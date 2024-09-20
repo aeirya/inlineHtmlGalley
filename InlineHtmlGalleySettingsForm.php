@@ -21,10 +21,10 @@ use APP\template\TemplateManager;
 class InlineHtmlGalleySettingsForm extends Form {
 
 	/** @var $plugin InlineHtmlGalleyPlugin */
-	var $plugin;
+	private InlineHtmlGalleyPlugin $plugin;
 
 	/** @var $contextId int */
-	var $contextId;
+	private int $contextId;
 
 	/**
 	 * Constructor

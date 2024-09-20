@@ -13,24 +13,25 @@
  */
 namespace APP\plugins\generic\inlineHtmlGalley;
 
+use APP\core\PageRouter;
 use PKP\plugins\BlockPlugin;
 use PKP\config\Config;
 use PKP\plugins\PluginRegistry;
 
 class InlineHtmlGalleyBlockPlugin extends BlockPlugin {
 
-	/** @var $parentPluginName string name of InlineHtmlGalley plugin */
-	var $parentPluginName;
+	/** @var string $parentPluginName string name of InlineHtmlGalley plugin */
+	public $parentPluginName;
 
-	/** @var $pluginPath string path to InlineHtmlGalley plugins */
-	var $pluginPath;
+	/** @var string $pluginPath string path to InlineHtmlGalley plugins */
+	public $pluginPath;
 
 	/**
 	 * Constructor
 	 * @param $parentPluginName string
 	 * @param $pluginPath string
 	 */
-	function __construct($parentPluginName, $pluginPath) {
+	public function __construct($parentPluginName, $pluginPath) {
 		parent::__construct();
 		$this->parentPluginName = $parentPluginName;
 		$this->pluginPath = $pluginPath;
@@ -40,31 +41,31 @@ class InlineHtmlGalleyBlockPlugin extends BlockPlugin {
 	 * Override currentVersion to prevent upgrade and delete management.
 	 * @return boolean
 	 */
-	function getCurrentVersion() {
+	public function getCurrentVersion() {
 		return false;
 	}
 
 	/**
 	 * @copydoc LazyLoadPlugin::getEnabled()
 	 */
-	function getEnabled($contextId = null) {
+	public function getEnabled($contextId = null) {
 		if (!Config::getVar('general', 'installed')) return true;
 		return parent::getEnabled($contextId);
 	}
 
 	/**
 	 * Get the display name of this plugin.
-	 * @return String
+	 * @return string
 	 */
-	function getDisplayName() {
+	public function getDisplayName() {
 		return __('plugins.generic.inlineHtmlGalley.block.download.displayName');
 	}
 
 	/**
 	 * Get a description of the plugin.
-	 * @return String
+	 * @return string
 	 */
-	function getDescription() {
+	public function getDescription() {
 		return __('plugins.generic.inlineHtmlGalley.block.download.description');
 	}
 
@@ -72,7 +73,7 @@ class InlineHtmlGalleyBlockPlugin extends BlockPlugin {
 	 * Hide this plugin from the management interface (it's subsidiary)
 	 * @return boolean
 	 */
-	function getHideManagement() {
+	public function getHideManagement() {
 		return true;
 	}
 
@@ -80,7 +81,7 @@ class InlineHtmlGalleyBlockPlugin extends BlockPlugin {
 	 * Get the supported contexts (e.g. BLOCK_CONTEXT_...) for this block.
 	 * @return array
 	 */
-	function getSupportedContexts() {
+	public function getSupportedContexts() {
 		return array(BLOCK_CONTEXT_SIDEBAR);
 	}
 
@@ -88,7 +89,7 @@ class InlineHtmlGalleyBlockPlugin extends BlockPlugin {
 	 * Get the parent plugin
 	 * @return object
 	 */
-	function &getParentPlugin() {
+	public function &getParentPlugin() {
 		$plugin = PluginRegistry::getPlugin('generic', $this->parentPluginName);
 		return $plugin;
 	}
@@ -97,27 +98,34 @@ class InlineHtmlGalleyBlockPlugin extends BlockPlugin {
 	 * Override the builtin to get the correct plugin path.
 	 * @return string
 	 */
-	function getPluginPath() {
+	public function getPluginPath() {
 		return $this->pluginPath;
 	}
 
 	/**
 	 * Get the name of the block template file.
-	 * @return String
+	 * @return string
 	 */
-	function getBlockTemplateFilename() {
+	public function getBlockTemplateFilename() {
 		return 'blockDownload.tpl';
 	}
 
 	/**
 	 * @copydoc BlockPlugin::getContents()
 	 */
-	function getContents($templateMgr, $request = null) {
+	public function getContents($templateMgr, $request = null) {
 		if ($templateMgr && $request) {
+			/** @var PageRouter $router */
 			$router = $request->getRouter();
-			if ($router->getRequestedPage($request) === 'article' && $router->getRequestedOp($request) === 'view') {
+			
+			$page = $router->getRequestedPage($request);
+			$op = $router->getRequestedOp($request);
+
+			if ($page === 'article' && $op === 'view') {
 				$submission = $templateMgr->getTemplateVars('article');
 				$galley = $templateMgr->getTemplateVars('galley');
+				
+				// Ensure both submission and galley exist, and check if the galley is HTML
 				if ($submission && $galley && $galley->getFileType() == 'text/html') {
 					$templateMgr->assign('submissionId', $submission->getBestArticleId());
 					$templateMgr->assign('galleyId', $galley->getBestGalleyId());
@@ -128,5 +136,3 @@ class InlineHtmlGalleyBlockPlugin extends BlockPlugin {
 		return false;
 	}
 }
-
-?>
